@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 import urllib2
 import feedparser
 import pexpect
@@ -5,6 +6,15 @@ import getpass
 import re
 
 from optparse import OptionParser
+
+def check_name(name,pass_a):
+    pw1 = Pwsafe('',pass_a)
+    user=pw1.get_user(name)
+    pass1= pw1.get_pass(name)
+    mail = Gmail(username=user, password=pass1)
+
+    print "%s %s Unread: %s" % (name, user, mail.get_mail_count())
+
 
 class Pwsafe:
     def __init__(self, username, password):
@@ -94,11 +104,7 @@ if __name__ == "__main__":
     if len(args) < 1:
         parser.error("Please supply username ")
 
-    name=args[0]
     pass_a = getpass.getpass()
-    pw1 = Pwsafe('',pass_a)
-    user=pw1.get_user(name)
-    pass1= pw1.get_pass(name)
-    mail = Gmail(username=user, password=pass1)
+    for name in args:
+        check_name(name, pass_a)
 
-    print "Unread: %s" % mail.get_mail_count()
