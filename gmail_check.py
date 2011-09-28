@@ -1,8 +1,34 @@
 import urllib2
 import feedparser
+import pexpect
+import getpass
+import re
 
 from optparse import OptionParser
 
+class Pwsafe:
+    def __init__(self, username, password):
+        self.pass1 = password
+    
+    def get_user(self,name):
+        return self.get_two('u',name)
+    
+    def get_pass(self,name):
+        return self.get_two('p',name)
+    
+    def get_two(self,flag,name):
+        p=pexpect.spawn('pwsafe -%sE '%(flag)+name)
+    
+        i=p.expect(['Enter passphrase for .*',pexpect.EOF])
+        if i==0:
+            p.sendline(self.pass1)
+        tmp1 = [line for line in p.readlines() if name in line][0]
+        re_com = '.*for %s: (.+)\r' % (name)
+        re1 = re.compile(re_com)
+        re2 = re1.match(tmp1)
+        if re2 :
+            return re2.groups()[0]
+    
 class Gmail:
     """ Provides interface for checking Google Mail
         For use with Conky
@@ -58,16 +84,21 @@ class Gmail:
 
 
 if __name__ == "__main__":
-    usage = "usage: %prog [options] username password"
+    usage = "usage: %prog [options] username "
     parser = OptionParser(usage=usage)
     parser.add_option("-m", "--messages", action="store_true", dest="messages",
                       help="display message information", default=False)
 
     (options, args) = parser.parse_args()
 
-    if len(args) < 2:
-        parser.error("Please supply both username and password")
+    if len(args) < 1:
+        parser.error("Please supply username ")
 
-    mail = Gmail(username=args[0], password=args[1])
+    name=args[0]
+    pass_a = getpass.getpass()
+    pw1 = Pwsafe('',pass_a)
+    user=pw1.get_user(name)
+    pass1= pw1.get_pass(name)
+    mail = Gmail(username=user, password=pass1)
 
     print "Unread: %s" % mail.get_mail_count()
