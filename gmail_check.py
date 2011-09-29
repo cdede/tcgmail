@@ -7,33 +7,34 @@ import re
 
 from optparse import OptionParser
 
-def check_name(name,pass_a):
-    pw1 = Pwsafe('',pass_a)
-    user=pw1.get_user(name)
-    pass1= pw1.get_pass(name)
+def check_name(name, pass_a):
+    pw1 = Pwsafe(name, pass_a)
+    user = pw1.get_user()
+    pass1 = pw1.get_pass()
     mail = Gmail(username=user, password=pass1)
 
     print "%s %s Unread: %s" % (name, user, mail.get_mail_count())
 
 
 class Pwsafe:
-    def __init__(self, username, password):
+    def __init__(self, name, password):
         self.pass1 = password
+        self.name = name
     
-    def get_user(self,name):
-        return self.get_two('u',name)
+    def get_user(self):
+        return self.get_two('u')
     
-    def get_pass(self,name):
-        return self.get_two('p',name)
+    def get_pass(self):
+        return self.get_two('p')
     
-    def get_two(self,flag,name):
-        p=pexpect.spawn('pwsafe -%sE '%(flag)+name)
+    def get_two(self, flag):
+        pe1 = pexpect.spawn('pwsafe -%sE '%(flag)+self.name)
     
-        i=p.expect(['Enter passphrase for .*',pexpect.EOF])
-        if i==0:
-            p.sendline(self.pass1)
-        tmp1 = [line for line in p.readlines() if name in line][0]
-        re_com = '.*for %s: (.+)\r' % (name)
+        i = pe1.expect(['Enter passphrase for .*', pexpect.EOF])
+        if i == 0:
+            pe1.sendline(self.pass1)
+        tmp1 = [line for line in pe1.readlines() if self.name in line][0]
+        re_com = '.*for %s: (.+)\r' % (self.name)
         re1 = re.compile(re_com)
         re2 = re1.match(tmp1)
         if re2 :
@@ -64,14 +65,14 @@ class Gmail:
         handler = urllib2.HTTPBasicAuthHandler(self.passwd_mgr)
 
         opener = urllib2.build_opener(handler)
-        file = opener.open(self.url)
-        return file.read()
+        file1 = opener.open(self.url)
+        return file1.read()
 
     def _parse_atom(self):
         """ Open feed and parse atom using feedparser
         """
-        file = self._open_url()
-        self.doc = feedparser.parse(file)
+        file1 = self._open_url()
+        self.doc = feedparser.parse(file1)
 
     def get_mail_count(self):
         """ Return unread mail count
@@ -87,13 +88,14 @@ class Gmail:
 #        summaries = {}
 #        if entries:
 #            for x in range(3):
-#                summaries[x] = {'from_address': entries[x]['author_detail']['email'],
+#                summaries[x] = {
+#                    'from_address': entries[x]['author_detail']['email'],
 #                    'from_name': entries[x]['author_detail']['name'],
 #                    'title': entries[x]['title_detail']['value']}
 #        return summaries
 
 
-if __name__ == "__main__":
+def main():
     usage = "usage: %prog [options] username "
     parser = OptionParser(usage=usage)
     parser.add_option("-m", "--messages", action="store_true", dest="messages",
@@ -108,3 +110,5 @@ if __name__ == "__main__":
     for name in args:
         check_name(name, pass_a)
 
+if __name__ == "__main__":
+    main()
