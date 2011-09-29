@@ -1,4 +1,6 @@
 #!/usr/bin/python2
+'''check gmail
+'''
 import urllib2
 import feedparser
 import pexpect
@@ -8,26 +10,39 @@ import re
 from optparse import OptionParser
 
 def check_name(name, pass_a):
+    ''' check gmail 
+    name = pwsafe name
+    pass_a = pwsafe password
+    '''
     pw1 = Pwsafe(name, pass_a)
     user = pw1.get_user()
     pass1 = pw1.get_pass()
     mail = Gmail(username=user, password=pass1)
 
-    print "%s %s Unread: %s" % (name, user, mail.get_mail_count())
+    tmp_a = mail.get_mail_count()
+    if tmp_a == 0 :
+        print "%s Unused: 0" % (name)
+    else:
+        print "%s %s Unread: %s" % (name, user, tmp_a)
 
 
 class Pwsafe:
+    '''get user and password
+    '''
     def __init__(self, name, password):
         self.pass1 = password
         self.name = name
     
     def get_user(self):
+        '''get user '''
         return self.get_two('u')
     
     def get_pass(self):
+        '''get password '''
         return self.get_two('p')
     
     def get_two(self, flag):
+        '''get user or password '''
         pe1 = pexpect.spawn('pwsafe -%sE '%(flag)+self.name)
     
         i = pe1.expect(['Enter passphrase for .*', pexpect.EOF])
@@ -96,18 +111,24 @@ class Gmail:
 
 
 def main():
+    '''main'''
     usage = "usage: %prog [options] username "
     parser = OptionParser(usage=usage)
-    parser.add_option("-m", "--messages", action="store_true", dest="messages",
-                      help="display message information", default=False)
+    parser.add_option("-s", "--split", action="store_true", dest="split",
+                      help="split args[0]", default=False)
 
     (options, args) = parser.parse_args()
-
+    
     if len(args) < 1:
         parser.error("Please supply username ")
 
+    if options.split :
+        tmp_a = args[0].split()
+    else:
+        tmp_a = args
+
     pass_a = getpass.getpass()
-    for name in args:
+    for name in tmp_a:
         check_name(name, pass_a)
 
 if __name__ == "__main__":
