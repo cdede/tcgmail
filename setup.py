@@ -11,23 +11,23 @@ except:
     sys.exit(0)
 
 setup(
-    name = "tpnotifier",
+    name = "tcgmail",
     author = "",
     author_email = "",
     version = "0.8",
     license = "GPL",
-    description = "A text-based new-package notifier for ArchLinux without sudo",
+    description = "A text-based notifier for gmail",
     long_description = "README",
-    url = "http://github.com/cdede/tpnotifier/",
+    url = "http://github.com/cdede/tcgmail/",
     platforms = 'POSIX',
-    packages = ['tpnoti' ],
+    packages = ['tcgmail' ],
     data_files = [
         (
-            sysconfig.get_python_lib() + '/tpnoti',
+            sysconfig.get_python_lib() + '/tcgmail',
             [
                 './README'
             ]
         )
     ],
-    scripts = ['tpnotifier', 'tpn_root']
+    scripts = ['tcgmail']
 )
