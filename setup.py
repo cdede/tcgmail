@@ -29,5 +29,5 @@ setup(
             ]
         )
     ],
-    scripts = ['tcgmail']
+    scripts = ['tcgmai']
 )
