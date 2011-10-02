@@ -1,3 +1,7 @@
+'''check gmail
+'''
+import urllib2
+import feedparser
    
 class Gmail:
     """ Provides interface for checking Google Mail

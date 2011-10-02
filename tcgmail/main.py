@@ -1,13 +1,10 @@
-#!/usr/bin/python2
 '''check gmail
 '''
-import urllib2
-import feedparser
-import pexpect
 import getpass
-import re
 
 from optparse import OptionParser
+from pwsafe import Pwsafe
+from gmail import Gmail
 
 def check_name(name, pass_a):
     ''' check gmail 
@@ -47,5 +44,3 @@ def main():
     for name in tmp_a:
         check_name(name, pass_a)
 
-if __name__ == "__main__":
-    main()

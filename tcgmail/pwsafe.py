@@ -1,3 +1,7 @@
+'''get user and password
+'''
+import pexpect
+import re
 
 class Pwsafe:
     '''get user and password

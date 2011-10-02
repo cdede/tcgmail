@@ -1,0 +1,5 @@
+#!/usr/bin/python2
+from tcgmail.main import main
+
+if __name__ == "__main__":
+    main()
