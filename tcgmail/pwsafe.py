@@ -26,7 +26,7 @@ class Pwsafe:
         if i == 0:
             pe1.sendline(self.pass1)
         tmp1 = [line for line in pe1.readlines() if self.name in line][0]
-        re_com = '.*for %s: (.+)\r' % (self.name)
+        re_com = '.*for .*%s.*: (.+)\r' % (self.name)
         re1 = re.compile(re_com)
         re2 = re1.match(tmp1)
         if re2 :
