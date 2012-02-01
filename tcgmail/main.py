@@ -47,8 +47,9 @@ def main():
     parser.add_option("-s", "--set-pass", action="store_true", dest="set_pass",
                       help="save password to file", default=False)
 
-    (options, args) = parser.parse_args()
-    
+    parser.add_option("-i", "--in-pass", action="store_true", dest="echo_pass",
+                      help="read  password ", default=False)
+
     (options, args) = parser.parse_args()
     
     if options.set_pass :
@@ -64,7 +65,13 @@ def main():
     if len(args) < 1:
         parser.error("Please supply username ")
 
-    pass_a = getpass.getpass()
+    if options.echo_pass:
+        for line in sys.stdin.readlines():
+            pass_a = line.replace('\n','')
+            break
+    else:
+        pass_a = getpass.getpass()
+
     if options.get :
         name = args[0]
         get_name(name, pass_a)
