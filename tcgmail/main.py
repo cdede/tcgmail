@@ -7,6 +7,7 @@ from pwsafe import Pwsafe
 from gmail import Gmail
 import sys, os, time
 import base64
+import tempfile
 
 def check_name(name, pass_a):
     ''' check gmail 
@@ -43,8 +44,23 @@ def main():
     parser.add_option("-g", "--get", action="store_true", dest="get",
                       help="get args[0] user and password with xsel", default=False)
 
+    parser.add_option("-s", "--set-pass", action="store_true", dest="set_pass",
+                      help="save password to file", default=False)
+
     (options, args) = parser.parse_args()
     
+    (options, args) = parser.parse_args()
+    
+    if options.set_pass :
+        pass_a = getpass.getpass()
+        fd,temp_file_name=tempfile.mkstemp()
+        os.close(fd)
+        f1=open(temp_file_name,'w')
+        f1.write(pass_a) 
+        f1.close()
+        print temp_file_name
+        sys.exit()
+
     if len(args) < 1:
         parser.error("Please supply username ")
 
