@@ -3,8 +3,13 @@ import email
 import email.header
 import imaplib
 import sys
+import os
+import glob
+import shutil
 
 import xoauth
+from optparse import OptionParser
+import tempfile
 
 scope = 'https://mail.google.com/'
 consumer = xoauth.OAuthEntity('anonymous', 'anonymous')
@@ -12,16 +17,8 @@ imap_hostname = 'imap.gmail.com'
 
 MAX_FETCH = 20
 
-sys.path.append('/tmp/QVeTTZ74vm')
-try:
-  import config
-except ImportError:
-  class Config():
-    pass
-  config = Config()
 
-
-def get_access_token():
+def get_access_token(config):
 
   request_token = xoauth.GenerateRequestToken(
       consumer, scope, nonce=None, timestamp=None,
@@ -39,19 +36,46 @@ def get_access_token():
 
 
 def main():
+  parser = OptionParser()
+  parser.add_option("-c", "--check", action="store_true", dest="check",
+                      help="check mail", default=False)
+  parser.add_option("-a", "--add", action="store_true", dest="add",
+                      help="add mail conf", default=False)
+  (options, args) = parser.parse_args()
 
 
-  if not hasattr(config, 'user') or not hasattr(config, 'access_token'):
+  if options.add:
+
+    class Config():
+      pass
+    config = Config()
     config.user = raw_input('Please enter your email address: ')
     config.google_accounts_url_generator = xoauth.GoogleAccountsUrlGenerator(config.user)
-    access_token = get_access_token()
+    access_token = get_access_token(config)
     config.access_token = {'key': access_token.key, 'secret': access_token.secret}
     f = open('config.py', 'w')
     f.write('user = %s\n' % repr(config.user))
     f.write('access_token = %s\n' % repr(config.access_token))
     f.close()
     print '\n\nconfig.py written.\n\n'
+  if options.check:
+    path1=os.getenv('XDG_CONFIG_HOME')
+    path2=tempfile.mkdtemp()
+    sys.path.append(path2)
+    for it1 in glob.glob(os.path.join(path1,'tcgmail','*.conf')):
+      print os.path.splitext(os.path.basename(it1))[0]
+      shutil.copyfile(it1,os.path.join(path2,'config.py'))
 
+      try:
+        import config
+      except ImportError:
+        class Config():
+          pass
+        config = Config()
+      check_name(config)
+
+
+def check_name(config):
   config.google_accounts_url_generator = xoauth.GoogleAccountsUrlGenerator(config.user)
   access_token = xoauth.OAuthEntity(config.access_token['key'], config.access_token['secret'])
 
