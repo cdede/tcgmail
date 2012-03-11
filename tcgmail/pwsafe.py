@@ -1,7 +1,13 @@
+#!/usr/bin/python2
 '''get user and password
 '''
 import pexpect
 import re
+import getpass
+import sys
+import os
+import time
+import base64
 
 class Pwsafe:
     '''get user and password
@@ -32,3 +38,21 @@ class Pwsafe:
         if re2 :
             return re2.groups()[0]
  
+def get_name(name, pass_a):
+    ''' get name user and password with xsel'''
+    pw1 = Pwsafe(name, pass_a)
+    user = pw1.get_user()
+    pass1 = pw1.get_pass()
+    print (user)
+    encoded = base64.b64encode(pass1)
+    os.system('echo %s |base64 -d |xsel -i' % encoded)
+    time.sleep(9)
+    os.system('xsel -c')
+
+def main(): 
+    pass_a = getpass.getpass()
+    name = sys.argv[1]
+    get_name(name,pass_a)
+
+if __name__ == '__main__':
+  main()
