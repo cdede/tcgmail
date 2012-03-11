@@ -64,14 +64,15 @@ def main():
     sys.path.append(path2)
     for it1 in glob.glob(os.path.join(path1,'tcgmail','*.conf')):
       print os.path.splitext(os.path.basename(it1))[0]
-      shutil.copyfile(it1,os.path.join(path2,'config.py'))
-
+      file4=os.path.join(path2,'config.py')
+      shutil.copyfile(it1,file4)
       try:
         import config
       except ImportError:
         class Config():
           pass
         config = Config()
+      config=reload(config)
       check_name(config)
     shutil.rmtree(path2)
 
@@ -79,6 +80,7 @@ def main():
 def check_name(config):
   config.google_accounts_url_generator = xoauth.GoogleAccountsUrlGenerator(config.user)
   access_token = xoauth.OAuthEntity(config.access_token['key'], config.access_token['secret'])
+  print config.user
 
   class ImBad():
     def write(self, msg): pass
