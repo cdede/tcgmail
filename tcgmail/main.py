@@ -73,6 +73,7 @@ def main():
           pass
         config = Config()
       check_name(config)
+    shutil.rmtree(path2)
 
 
 def check_name(config):

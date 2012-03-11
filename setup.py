@@ -4,10 +4,9 @@ from distutils import sysconfig
 from distutils.core import setup
 
 try:
-    import feedparser
+    import os
 except:
     print ('')
-    print ('tpnotifier requires the python-feedparser')
     sys.exit(0)
 
 setup(
