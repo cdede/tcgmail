@@ -59,10 +59,9 @@ def main():
     f.close()
     print '\n\nconfig.py written.\n\n'
   if options.check:
-    path1=os.getenv('XDG_CONFIG_HOME')
     path2=tempfile.mkdtemp()
     sys.path.append(path2)
-    for it1 in glob.glob(os.path.join(path1,'tcgmail','*.conf')):
+    for it1 in args:
       print os.path.splitext(os.path.basename(it1))[0]
       file4=os.path.join(path2,'config.py')
       shutil.copyfile(it1,file4)
