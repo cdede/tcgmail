@@ -77,6 +77,7 @@ def main():
                 print os.path.splitext(os.path.basename(it1))[0]
             else:
                 print '.',
+                sys.stdout.flush()
 
         shutil.rmtree(path2)
 
