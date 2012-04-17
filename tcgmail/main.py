@@ -63,7 +63,6 @@ def main():
         path2 = tempfile.mkdtemp()
         sys.path.append(path2)
         for it1 in args:
-            print os.path.splitext(os.path.basename(it1))[0]
             file4 = os.path.join(path2,'config.py')
             shutil.copyfile(it1, file4)
             try:
@@ -73,7 +72,12 @@ def main():
                     pass
                 config = Config()
             config = reload(config)
-            check_name(config)
+            num = check_name(config)
+            if num > 0 :
+                print os.path.splitext(os.path.basename(it1))[0]
+            else:
+                print '.',
+
         shutil.rmtree(path2)
 
 
@@ -98,9 +102,10 @@ def check_name(config):
     imap_conn.select('INBOX', readonly=True)
     _, data = imap_conn.search(None, 'UNSEEN')
     unreads = data[0].split()
-    if len(unreads)>0:
+    lenunre = len(unreads)
+    if lenunre>0:
         print config.user
-        print '%d unread message(s).' % len(unreads)
+        print '%d unread message(s).' % lenunre
     ids = ','.join(unreads[:MAX_FETCH])
     if ids:
         _, data = imap_conn.fetch(ids, '(RFC822.HEADER)')
@@ -114,6 +119,7 @@ def check_name(config):
                 )
     imap_conn.close()
     imap_conn.logout()
+    return lenunre
 
 
 if __name__ == '__main__':
