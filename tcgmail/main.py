@@ -66,14 +66,38 @@ def set_pass():
     file1.close()
     print filename1
 
+def check_mail(pass_a,args):
+    str1='action "inbox" mbox "%h/.Mail/INBOX"\n'
+    for name in args:
+        pw1 = Pwsafe(name, pass_a)
+        user = pw1.get_user()
+        pass1 = pw1.get_pass()
+        str1 +='''account "%s" imaps server "imap.gmail.com"
+        user "%s" pass "%s"\n'''%(name,user,pass1)
+    str1+='match all action "inbox"'
+
+    fd1,filename1 = tempfile.mkstemp()
+    os.close(fd1)
+
+    file1 = open(filename1, 'w')
+    file1.write(str1)
+    file1.close()
+    os.system('fdm -f %s fetch' %filename1)
+    os.remove(filename1)
+
 def main(): 
     parser = OptionParser()
     parser.add_option("-a", "--add", action="store_true", dest="add",
                       help="add password", default=False)
     parser.add_option("-p", "--pass", dest="password", help="password", metavar="pass")
+    parser.add_option("-m", "--mail", action="store_true", dest="mail",
+                      help="check mail", default=False)
     (options, args) = parser.parse_args()
     if options.add:
         set_pass()
+        sys.exit()
+    if options.mail:
+        check_mail(options.password,args)
         sys.exit()
     pass_a = options.password
     name = args[0]
