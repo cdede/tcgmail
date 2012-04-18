@@ -1,107 +1,127 @@
-#!/usr/bin/python2
-'''get user and password
-1.   pwsafe.py -a
-2.   gpg -er abcde /tmp/????
-3.   mv /tmp/????.gpg file.gpg
-pwsafe.py -p `gpg --output - file.gpg ` item
 
-'''
-import pexpect
-import re
-import getpass
+import email
+import email.header
+import imaplib
 import sys
 import os
-import time
-import base64
+import shutil
+
+import xoauth
 from optparse import OptionParser
 import tempfile
 
-class Pwsafe:
-    '''get user and password
-    '''
-    def __init__(self, name, password):
-        self.pass1 = password
-        self.name = name
-    
-    def get_user(self):
-        '''get user '''
-        return self.get_two('u')
-    
-    def get_pass(self):
-        '''get password '''
-        return self.get_two('p')
-    
-    def get_two(self, flag):
-        '''get user or password '''
-        pe1 = pexpect.spawn('pwsafe -%sE '%(flag)+self.name)
-    
-        i = pe1.expect(['Enter passphrase for .*', pexpect.EOF])
-        if i == 0:
-            pe1.sendline(self.pass1)
-        tmp1 = [line for line in pe1.readlines() if self.name in line][0]
-        re_com = '.*for .*%s.*: (.+)\r' % (self.name)
-        re1 = re.compile(re_com)
-        re2 = re1.match(tmp1)
-        if re2 :
-            return re2.groups()[0]
- 
-def get_name(name, pass_a):
-    ''' get name user and password with xsel'''
-    pw1 = Pwsafe(name, pass_a)
-    user = pw1.get_user()
-    pass1 = pw1.get_pass()
-    print (user)
-    encoded = base64.b64encode(pass1)
-    os.system('echo %s |base64 -d |xsel -i' % encoded)
-    time.sleep(9)
-    os.system('xsel -c')
+consumer = xoauth.OAuthEntity('anonymous', 'anonymous')
 
-def set_pass():
-    pass_a = getpass.getpass()
-    fd1,filename1 = tempfile.mkstemp()
-    os.close(fd1)
+MAX_FETCH = 20
 
-    file1 = open(filename1, 'w')
-    file1.write(pass_a)
-    file1.close()
-    print filename1
 
-def check_mail(pass_a,args):
-    str1='action "inbox" mbox "%h/.Mail/INBOX"\n'
-    for name in args:
-        pw1 = Pwsafe(name, pass_a)
-        user = pw1.get_user()
-        pass1 = pw1.get_pass()
-        str1 +='''account "%s" imaps server "imap.gmail.com"
-        user "%s" pass "%s"\n'''%(name,user,pass1)
-    str1+='match all action "inbox"'
+def get_access_token(config):
+    scope = 'https://mail.google.com/'
 
-    fd1,filename1 = tempfile.mkstemp()
-    os.close(fd1)
+    request_token = xoauth.GenerateRequestToken(
+      consumer, scope, nonce=None, timestamp=None,
+      google_accounts_url_generator=config.google_accounts_url_generator
+      )
 
-    file1 = open(filename1, 'w')
-    file1.write(str1)
-    file1.close()
-    os.system('fdm -f %s fetch' %filename1)
-    os.remove(filename1)
+    oauth_verifier = raw_input('Enter verification code: ').strip()
+    try:
+        access_token = xoauth.GetAccessToken(
+        consumer, request_token, oauth_verifier, 
+        config.google_accounts_url_generator)
+    except ValueError:
+        print 'Incorrect verification code?'
+        sys.exit(1)
+    return access_token
 
-def main(): 
+
+def main():
     parser = OptionParser()
-    parser.add_option("-a", "--add", action="store_true", dest="add",
-                      help="add password", default=False)
-    parser.add_option("-p", "--pass", dest="password", help="password", metavar="pass")
-    parser.add_option("-m", "--mail", action="store_true", dest="mail",
+    parser.add_option("-c", "--check", action="store_true", dest="check",
                       help="check mail", default=False)
+    parser.add_option("-a", "--add", action="store_true", dest="add",
+                      help="add mail conf", default=False)
     (options, args) = parser.parse_args()
+
+
     if options.add:
-        set_pass()
-        sys.exit()
-    if options.mail:
-        check_mail(options.password,args)
-        sys.exit()
-    pass_a = options.password
-    name = args[0]
-    get_name(name,pass_a)
+
+        class Config():
+            pass
+        config = Config()
+        config.user = raw_input('Please enter your email address: ')
+        config.google_accounts_url_generator = \
+        xoauth.GoogleAccountsUrlGenerator(config.user)
+        access_token = get_access_token(config)
+        config.access_token = {'key': access_token.key, 
+                'secret': access_token.secret}
+        file1 = open('config.py', 'w')
+        file1.write('user = %s\n' % repr(config.user))
+        file1.write('access_token = %s\n' % repr(config.access_token))
+        file1.close()
+        print '\n\nconfig.py written.\n\n'
+    if options.check:
+        path2 = tempfile.mkdtemp()
+        sys.path.append(path2)
+        for it1 in args:
+            file4 = os.path.join(path2,'config.py')
+            shutil.copyfile(it1, file4)
+            try:
+                import config
+            except ImportError:
+                class Config():
+                    pass
+                config = Config()
+            config = reload(config)
+            num = check_name(config)
+            if num > 0 :
+                print os.path.splitext(os.path.basename(it1))[0]
+            else:
+                print '.',
+                sys.stdout.flush()
+
+        shutil.rmtree(path2)
+
+
+def check_name(config):
+    imap_hostname = 'imap.gmail.com'
+    config.google_accounts_url_generator = \
+            xoauth.GoogleAccountsUrlGenerator(config.user)
+    access_token = xoauth.OAuthEntity(config.access_token['key'], 
+            config.access_token['secret'])
+
+    class ImBad():
+        def write(self, msg): 
+            pass
+    sys.stdout = ImBad()
+    xoauth_string = xoauth.GenerateXOauthString(
+          consumer, access_token, config.user, 'IMAP',
+          xoauth_requestor_id=None, nonce=None, timestamp=None)
+    sys.stdout = sys.__stdout__
+
+    imap_conn = imaplib.IMAP4_SSL(imap_hostname)
+    imap_conn.authenticate('XOAUTH', lambda x: xoauth_string)
+    imap_conn.select('INBOX', readonly=True)
+    _, data = imap_conn.search(None, 'UNSEEN')
+    unreads = data[0].split()
+    lenunre = len(unreads)
+    if lenunre>0:
+        print '\n',config.user,
+        print '%d unread message(s).' % lenunre
+    ids = ','.join(unreads[:MAX_FETCH])
+    if ids:
+        _, data = imap_conn.fetch(ids, '(RFC822.HEADER)')
+        for item in data:
+            if isinstance(item, tuple):
+                raw_msg = item[1]
+                msg = email.message_from_string(raw_msg)
+                print '\033[1;35m%s\033[0m: \033[1;32m%s\033[0m' % (
+                email.header.decode_header(msg['from'])[0][0],
+                email.header.decode_header(msg['subject'])[0][0],
+                )
+    imap_conn.close()
+    imap_conn.logout()
+    return lenunre
+
 
 if __name__ == '__main__':
-  main()
+    main()
