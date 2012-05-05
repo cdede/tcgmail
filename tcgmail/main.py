@@ -10,6 +10,7 @@ import xoauth
 from optparse import OptionParser
 import tempfile
 import json
+import time
 
 consumer = xoauth.OAuthEntity('anonymous', 'anonymous')
 
@@ -43,32 +44,35 @@ def main():
                       help="add mail conf", default=False)
     (options, args) = parser.parse_args()
 
-
     if options.add:
+        config2={}
         config1={}
         config1['user']= raw_input('Please enter your email address: ')
         access_token = get_access_token(xoauth.GoogleAccountsUrlGenerator(config1['user']))
         config1['access_token']= {'key': access_token.key, 
                 'secret': access_token.secret}
         
-        file1 = open('config.py', 'w')
-        k=json.dumps(config1)
-        file1.write('%s\n' % k)
+        file1 = open('config', 'w')
+        config2[str(int(time.time()))]=config1
+        k=json.dump(config2,file1,indent=4)
         file1.close()
-        print '\n\nconfig.py written.\n\n'
+        print '\n\nconfig written.\n\n'
+
     if options.check:
-        for it1 in args:
-            tmp1=json.loads(open(it1,'r').read())
+        file1 = open(args[0],'r')
+        tmp1=json.load(file1)
+        file1.close()
+        for key,it1 in tmp1.items():
             class Config():
                 pass
             config = Config()
-            for key,item in tmp1['access_token'].items():
-                tmp1['access_token'][key]=item.encode('ascii')
-            config.user=tmp1['user'].encode("ascii")
-            config.access_token=tmp1['access_token']
+            for key2,item in it1['access_token'].items():
+                it1['access_token'][key2]=item.encode('ascii')
+            config.user=it1['user'].encode("ascii")
+            config.access_token=it1['access_token']
             num = check_name(config)
             if num > 0 :
-                print os.path.splitext(os.path.basename(it1))[0]
+                print key
             else:
                 print '.',
                 sys.stdout.flush()
@@ -112,8 +116,6 @@ def check_name(config):
     imap_conn.close()
     imap_conn.logout()
     return lenunre
-
-
 
 if __name__ == '__main__':
     main()
