@@ -9,25 +9,26 @@ import shutil
 import xoauth
 from optparse import OptionParser
 import tempfile
+import json
 
 consumer = xoauth.OAuthEntity('anonymous', 'anonymous')
 
 MAX_FETCH = 20
 
 
-def get_access_token(config):
+def get_access_token(google_accounts_url_generator):
     scope = 'https://mail.google.com/'
 
     request_token = xoauth.GenerateRequestToken(
       consumer, scope, nonce=None, timestamp=None,
-      google_accounts_url_generator=config.google_accounts_url_generator
+      google_accounts_url_generator=google_accounts_url_generator
       )
 
     oauth_verifier = raw_input('Enter verification code: ').strip()
     try:
         access_token = xoauth.GetAccessToken(
         consumer, request_token, oauth_verifier, 
-        config.google_accounts_url_generator)
+        google_accounts_url_generator)
     except ValueError:
         print 'Incorrect verification code?'
         sys.exit(1)
@@ -44,43 +45,33 @@ def main():
 
 
     if options.add:
-
-        class Config():
-            pass
-        config = Config()
-        config.user = raw_input('Please enter your email address: ')
-        config.google_accounts_url_generator = \
-        xoauth.GoogleAccountsUrlGenerator(config.user)
-        access_token = get_access_token(config)
-        config.access_token = {'key': access_token.key, 
+        config1={}
+        config1['user']= raw_input('Please enter your email address: ')
+        access_token = get_access_token(xoauth.GoogleAccountsUrlGenerator(config1['user']))
+        config1['access_token']= {'key': access_token.key, 
                 'secret': access_token.secret}
+        
         file1 = open('config.py', 'w')
-        file1.write('user = %s\n' % repr(config.user))
-        file1.write('access_token = %s\n' % repr(config.access_token))
+        k=json.dumps(config1)
+        file1.write('%s\n' % k)
         file1.close()
         print '\n\nconfig.py written.\n\n'
     if options.check:
-        path2 = tempfile.mkdtemp()
-        sys.path.append(path2)
         for it1 in args:
-            file4 = os.path.join(path2,'config.py')
-            shutil.copyfile(it1, file4)
-            try:
-                import config
-            except ImportError:
-                class Config():
-                    pass
-                config = Config()
-            config = reload(config)
+            tmp1=json.loads(open(it1,'r').read())
+            class Config():
+                pass
+            config = Config()
+            for key,item in tmp1['access_token'].items():
+                tmp1['access_token'][key]=item.encode('ascii')
+            config.user=tmp1['user'].encode("ascii")
+            config.access_token=tmp1['access_token']
             num = check_name(config)
             if num > 0 :
                 print os.path.splitext(os.path.basename(it1))[0]
             else:
                 print '.',
                 sys.stdout.flush()
-
-        shutil.rmtree(path2)
-
 
 def check_name(config):
     imap_hostname = 'imap.gmail.com'
@@ -121,6 +112,7 @@ def check_name(config):
     imap_conn.close()
     imap_conn.logout()
     return lenunre
+
 
 
 if __name__ == '__main__':
