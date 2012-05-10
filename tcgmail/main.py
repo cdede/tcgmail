@@ -40,6 +40,8 @@ def main():
     parser = OptionParser()
     parser.add_option("-c", "--check", action="store_true", dest="check",
                       help="check mail", default=False)
+    parser.add_option("-i", "--input", action="store_true", dest="input",
+                      help="Read standard input to check mail", default=False)
     parser.add_option("-a", "--add", action="store_true", dest="add",
                       help="add mail conf", default=False)
     (options, args) = parser.parse_args()
@@ -62,20 +64,27 @@ def main():
         file1 = open(args[0],'r')
         tmp1=json.load(file1)
         file1.close()
-        for key,it1 in tmp1.items():
-            class Config():
-                pass
-            config = Config()
-            for key2,item in it1['access_token'].items():
-                it1['access_token'][key2]=item.encode('ascii')
-            config.user=it1['user'].encode("ascii")
-            config.access_token=it1['access_token']
-            num = check_name(config)
-            if num > 0 :
-                print key
-            else:
-                print '.',
-                sys.stdout.flush()
+        check_items(tmp1)
+
+    if options.input:
+        tmp1=json.load(sys.stdin)
+        check_items(tmp1)
+
+def check_items(tmp1):
+    for key,it1 in tmp1.items():
+        class Config():
+            pass
+        config = Config()
+        for key2,item in it1['access_token'].items():
+            it1['access_token'][key2]=item.encode('ascii')
+        config.user=it1['user'].encode("ascii")
+        config.access_token=it1['access_token']
+        num = check_name(config)
+        if num > 0 :
+            print key
+        else:
+            print '.',
+            sys.stdout.flush()
 
 def check_name(config):
     imap_hostname = 'imap.gmail.com'
