@@ -10,7 +10,6 @@ import xoauth
 from optparse import OptionParser
 import tempfile
 import json
-import time
 import os.path
 import subprocess
 
@@ -47,7 +46,6 @@ def main():
     (options, args) = parser.parse_args()
 
     if options.add:
-        config2={}
         config1={}
         config1['user']= raw_input('Please enter your email address: ')
         access_token = get_access_token(xoauth.GoogleAccountsUrlGenerator(config1['user']))
@@ -55,10 +53,9 @@ def main():
                 'secret': access_token.secret}
         
         file1 = open('config', 'w')
-        config2[str(int(time.time()))]=config1
-        k=json.dump(config2,file1,indent=4)
+        k=json.dump(config1,file1,indent=4)
         file1.close()
-        print '\n\nconfig written.\n\n'
+        print '\nconfig written.\n'
 
     if options.check:
         filename=args[0]
