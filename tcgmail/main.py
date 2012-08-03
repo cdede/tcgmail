@@ -11,6 +11,8 @@ from optparse import OptionParser
 import tempfile
 import json
 import time
+import os.path
+import subprocess
 
 consumer = xoauth.OAuthEntity('anonymous', 'anonymous')
 
@@ -40,8 +42,6 @@ def main():
     parser = OptionParser()
     parser.add_option("-c", "--check", action="store_true", dest="check",
                       help="check mail", default=False)
-    parser.add_option("-i", "--input", action="store_true", dest="input",
-                      help="Read standard input to check mail", default=False)
     parser.add_option("-a", "--add", action="store_true", dest="add",
                       help="add mail conf", default=False)
     (options, args) = parser.parse_args()
@@ -61,13 +61,14 @@ def main():
         print '\n\nconfig written.\n\n'
 
     if options.check:
-        file1 = open(args[0],'r')
-        tmp1=json.load(file1)
-        file1.close()
-        check_items(tmp1)
+        if os.path.splitext(file1)[1] == '.gpg':
+            ret= subprocess.Popen(args='gpg --output - %s' % file1, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[0]
 
-    if options.input:
-        tmp1=json.load(sys.stdin)
+            tmp1=json.loads(ret)
+        else:
+            file1 = open(args[0],'r')
+            tmp1=json.load(file1)
+            file1.close()
         check_items(tmp1)
 
 def check_items(tmp1):
