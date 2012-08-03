@@ -72,7 +72,7 @@ def main():
         check_items(tmp1)
 
 def check_items(tmp1):
-    for key,it1 in tmp1.items():
+    for it1 in tmp1:
         class Config():
             pass
         config = Config()
@@ -81,9 +81,7 @@ def check_items(tmp1):
         config.user=it1['user'].encode("ascii")
         config.access_token=it1['access_token']
         num = check_name(config)
-        if num > 0 :
-            print key
-        else:
+        if not num > 0 :
             print '.',
             sys.stdout.flush()
 
