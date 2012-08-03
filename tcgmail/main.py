@@ -61,12 +61,12 @@ def main():
         print '\n\nconfig written.\n\n'
 
     if options.check:
-        if os.path.splitext(file1)[1] == '.gpg':
-            ret= subprocess.Popen(args='gpg --output - %s' % file1, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[0]
-
+        filename=args[0]
+        if os.path.splitext(filename)[1] == '.gpg':
+            ret= subprocess.Popen(args='gpg --output - %s' % filename, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[0]
             tmp1=json.loads(ret)
         else:
-            file1 = open(args[0],'r')
+            file1 = open(filename,'r')
             tmp1=json.load(file1)
             file1.close()
         check_items(tmp1)
