@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-from tcgmail.main import main
+from libtcg.main import main
 
 if __name__ == "__main__":
     main()
