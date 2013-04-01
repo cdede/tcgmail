@@ -19,7 +19,7 @@ setup(
     long_description = "README",
     url = "http://github.com/cdede/tcgmail/",
     platforms = 'POSIX',
-    packages = ['tcgmail' ],
+    packages = ['libtcg' ],
     data_files = [
         (
             sysconfig.get_python_lib() + '/tcgmail',
@@ -28,5 +28,5 @@ setup(
             ]
         )
     ],
-    scripts = ['tcgmai']
+    scripts = ['tcgmail']
 )
