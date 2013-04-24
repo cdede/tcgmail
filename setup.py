@@ -13,7 +13,7 @@ setup(
     name = "tcgmail",
     author = "",
     author_email = "",
-    version = "0.8",
+    version = "1.0.1",
     license = "GPL",
     description = "A text-based notifier for gmail",
     long_description = "README",
