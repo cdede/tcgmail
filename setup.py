@@ -14,19 +14,14 @@ setup(
     author = "",
     author_email = "",
     version = "1.0.1",
-    license = "GPL",
+    license = "GPL3",
     description = "A text-based notifier for gmail",
     long_description = "README",
     url = "http://github.com/cdede/tcgmail/",
     platforms = 'POSIX',
     packages = ['libtcg' ],
-    data_files = [
-        (
-            sysconfig.get_python_lib() + '/tcgmail',
-            [
-                './README'
-            ]
-        )
+    data_files = [  ('share/doc/tcgmail', ['README', 'COPYING']),
+        ('share/tcgmail',['example_config']) ,
     ],
     scripts = ['tcgmail']
 )

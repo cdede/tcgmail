@@ -18,44 +18,11 @@ consumer = xoauth.OAuthEntity('anonymous', 'anonymous')
 MAX_FETCH = 20
 
 
-def get_access_token(google_accounts_url_generator):
-    scope = 'https://mail.google.com/'
-
-    request_token = xoauth.GenerateRequestToken(
-      consumer, scope, nonce=None, timestamp=None,
-      google_accounts_url_generator=google_accounts_url_generator
-      )
-
-    oauth_verifier = raw_input('Enter verification code: ').strip()
-    try:
-        access_token = xoauth.GetAccessToken(
-        consumer, request_token, oauth_verifier, 
-        google_accounts_url_generator)
-    except ValueError:
-        print 'Incorrect verification code?'
-        sys.exit(1)
-    return access_token
-
-
 def main():
     parser = OptionParser()
     parser.add_option("-c", "--check", action="store_true", dest="check",
                       help="check mail", default=False)
-    parser.add_option("-a", "--add", action="store_true", dest="add",
-                      help="add mail conf", default=False)
     (options, args) = parser.parse_args()
-
-    if options.add:
-        config1={}
-        config1['user']= raw_input('Please enter your email address: ')
-        access_token = get_access_token(xoauth.GoogleAccountsUrlGenerator(config1['user']))
-        config1['access_token']= {'key': access_token.key, 
-                'secret': access_token.secret}
-        
-        file1 = open('config', 'w')
-        k=json.dump(config1,file1,indent=4)
-        file1.close()
-        print '\nconfig written.\n'
 
     if options.check:
         filename=args[0]
