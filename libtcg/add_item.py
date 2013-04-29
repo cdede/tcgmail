@@ -33,10 +33,10 @@ def main():
     if args.add:
         config1={}
         config1['user']= args.username
-        client_id,client_secret = open_conf(filename)
-        print '  %s' % oauth2.GeneratePermissionUrl(client_id )
+        tmpc = open_conf(filename)
+        print '  %s' % oauth2.GeneratePermissionUrl(tmpc['client_id'] )
         authorization_code = raw_input('Enter verification code: ')
-        response = oauth2.AuthorizeTokens(client_id, client_secret,
+        response = oauth2.AuthorizeTokens(tmpc['client_id'], tmpc['client_secret'],
                                 authorization_code)
         config1['refresh_token']= response['refresh_token']
         file1 = open('config', 'w')
@@ -54,7 +54,8 @@ def main():
         k=json.dump(config1,file1,indent=4)
         file1.close()
     elif args.check:
-        client = open_conf(filename)
+        cf1 = open_conf(filename)
+        client = cf1['client_id'],cf1['client_secret']
         filename=args.filenames[0]
         if os.path.splitext(filename)[1] == '.gpg':
             pass
