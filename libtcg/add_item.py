@@ -46,9 +46,7 @@ def main():
     elif args.merge:
         config1=[]
         for f1 in args.filenames:
-            file1 = open(f1,'r')
-            tmp1=json.load(file1)
-            file1.close()
+            tmp1=open_conf(f1)
             config1.append(tmp1)
         file1 = open('config_merge', 'w')
         k=json.dump(config1,file1,indent=4)
@@ -57,12 +55,7 @@ def main():
         cf1 = open_conf(filename)
         client = cf1['client_id'],cf1['client_secret']
         filename=args.filenames[0]
-        if os.path.splitext(filename)[1] == '.gpg':
-            pass
-        else:
-            file1 = open(filename,'r')
-            tmp1=json.load(file1)
-            file1.close()
+        tmp1=open_conf(filename)
         check_items(tmp1,client)
 
 def check_items(tmp1,client):
@@ -79,7 +72,6 @@ def check_name(config,client):
     response = oauth2.RefreshToken(client_id, client_secret, refresh_token)
 
     access_token = response['access_token']
-    print user,access_token
     auth_string = oauth2.GenerateOAuth2String(user, access_token,
                              base64_encode=False)
     imap_conn = imaplib.IMAP4_SSL('imap.gmail.com')
