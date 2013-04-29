@@ -38,7 +38,7 @@ def main():
         authorization_code = raw_input('Enter verification code: ')
         response = oauth2.AuthorizeTokens(client_id, client_secret,
                                 authorization_code)
-        config1['access_token']= response['access_token']
+        config1['refresh_token']= response['refresh_token']
         file1 = open('config', 'w')
         k=json.dump(config1,file1,indent=4)
         file1.close()
@@ -54,6 +54,7 @@ def main():
         k=json.dump(config1,file1,indent=4)
         file1.close()
     elif args.check:
+        client = open_conf(filename)
         filename=args.filenames[0]
         if os.path.splitext(filename)[1] == '.gpg':
             pass
@@ -61,18 +62,22 @@ def main():
             file1 = open(filename,'r')
             tmp1=json.load(file1)
             file1.close()
-        check_items(tmp1)
+        check_items(tmp1,client)
 
-def check_items(tmp1):
+def check_items(tmp1,client):
     for it1 in tmp1:
-        num = check_name(it1)
+        num = check_name(it1,client)
         if not num > 0 :
             print '.',
             sys.stdout.flush()
 
-def check_name(config):
+def check_name(config,client):
+    client_id,client_secret = client
     user = config['user'].encode('ascii')
-    access_token = config['access_token'].encode('ascii')
+    refresh_token = config['refresh_token'].encode('ascii')
+    response = oauth2.RefreshToken(client_id, client_secret, refresh_token)
+
+    access_token = response['access_token']
     print user,access_token
     auth_string = oauth2.GenerateOAuth2String(user, access_token,
                              base64_encode=False)
