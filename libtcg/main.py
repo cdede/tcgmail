@@ -86,7 +86,7 @@ def check_name(config,client):
     unreads = data[0].split()
     lenunre = len(unreads)
     if lenunre>0:
-        print '\n',config.user,
+        print '\n',config['user'],
         print '%d unread message(s).' % lenunre
     ids = ','.join(unreads[:MAX_FETCH])
     if ids:
