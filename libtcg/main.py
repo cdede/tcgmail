@@ -1,5 +1,5 @@
 from common import open_conf
-import argparse
+from optparse import OptionParser
 import oauth2
 import json
 import os
@@ -9,30 +9,28 @@ import sys
 
 def arg_parse():
     "Parse the command line arguments"
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-f','--filename', help='conf filename'
+    parser = OptionParser()
+    parser.add_option('-f','--filename', help='conf filename'
             , default='')
-    parser.add_argument('-a','--add', action='store_true',default=False, 
+    parser.add_option('-a','--add', action='store_true',default=False, 
                         help='add mail conf' )
-    parser.add_argument('-m','--merge', action='store_true',default=False, 
+    parser.add_option('-m','--merge', action='store_true',default=False, 
                         help='merge  confs to conf' )
-    parser.add_argument('-c','--check', action='store_true',default=False, 
+    parser.add_option('-c','--check', action='store_true',default=False, 
                         help='check mail' )
-    parser.add_argument('-u','--username', help='gmail username'
+    parser.add_option('-u','--username', help='gmail username'
             , default='')
-    parser.add_argument('filenames', metavar='filename', type=str, nargs='+',                                
-                     help='merge filename ')
     return parser.parse_args()
 
 def main():
-    args = arg_parse()
-    if args.filename == '':
+    (options,args) = arg_parse()
+    if options.filename == '':
         pass
     else:
-        filename = args.filename
-    if args.add:
+        filename = options.filename
+    if options.add:
         config1={}
-        config1['user']= args.username
+        config1['user']= options.username
         tmpc = open_conf(filename)
         print '  %s' % oauth2.GeneratePermissionUrl(tmpc['client_id'] )
         authorization_code = raw_input('Enter verification code: ')
@@ -43,18 +41,18 @@ def main():
         k=json.dump(config1,file1,indent=4)
         file1.close()
         print '\nconfig written.\n'
-    elif args.merge:
+    elif options.merge:
         config1=[]
-        for f1 in args.filenames:
+        for f1 in args:
             tmp1=open_conf(f1)
             config1.append(tmp1)
         file1 = open('config_merge', 'w')
         k=json.dump(config1,file1,indent=4)
         file1.close()
-    elif args.check:
+    elif options.check:
         cf1 = open_conf(filename)
         client = cf1['client_id'],cf1['client_secret']
-        filename=args.filenames[0]
+        filename=args[0]
         tmp1=open_conf(filename)
         check_items(tmp1,client)
 
