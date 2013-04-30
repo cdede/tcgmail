@@ -42,18 +42,23 @@ def main():
         file1.close()
         print '\nconfig written.\n'
     elif options.merge:
+        config_a ={} 
+        cf1 = open_conf(filename)
+        config_a['common'] = cf1
         config1=[]
         for f1 in args:
             tmp1=open_conf(f1)
             config1.append(tmp1)
+
+        config_a['items'] = config1
         file1 = open('config_merge', 'w')
-        k=json.dump(config1,file1,indent=4)
+        k=json.dump(config_a,file1,indent=4)
         file1.close()
     elif options.check:
-        cf1 = open_conf(filename)
+        oc1 = open_conf(filename)
+        cf1 = oc1['common']
         client = cf1['client_id'],cf1['client_secret']
-        filename=args[0]
-        tmp1=open_conf(filename)
+        tmp1=oc1['items']
         check_items(tmp1,client)
 
 def check_items(tmp1,client):
