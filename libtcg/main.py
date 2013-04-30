@@ -14,6 +14,8 @@ def arg_parse():
             , default='')
     parser.add_option('-a','--add', action='store_true',default=False, 
                         help='add mail conf' )
+    parser.add_option('-o','--output', help='output filename'
+            , default='config')
     parser.add_option('-m','--merge', action='store_true',default=False, 
                         help='merge  confs to conf' )
     parser.add_option('-c','--check', action='store_true',default=False, 
@@ -37,7 +39,7 @@ def main():
         response = oauth2.AuthorizeTokens(tmpc['client_id'], tmpc['client_secret'],
                                 authorization_code)
         config1['refresh_token']= response['refresh_token']
-        file1 = open('config', 'w')
+        file1 = open(options.output, 'w')
         k=json.dump(config1,file1,indent=4)
         file1.close()
         print '\nconfig written.\n'
