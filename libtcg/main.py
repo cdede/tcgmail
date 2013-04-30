@@ -6,6 +6,7 @@ import os
 import imaplib
 MAX_FETCH = 20
 import sys
+import email
 
 def arg_parse():
     "Parse the command line arguments"
