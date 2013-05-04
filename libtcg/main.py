@@ -3,12 +3,8 @@ from optparse import OptionParser
 import oauth2
 import json
 import os
-import imaplib
-MAX_FETCH = 20
 import sys
-import email
-import email.header
-
+import check
 
 def arg_parse():
     "Parse the command line arguments"
@@ -82,29 +78,7 @@ def check_name(config,client):
     access_token = response['access_token']
     auth_string = oauth2.GenerateOAuth2String(user, access_token,
                              base64_encode=False)
-    imap_conn = imaplib.IMAP4_SSL('imap.gmail.com')
-    imap_conn.authenticate('XOAUTH2', lambda x: auth_string)
-    imap_conn.select('INBOX', readonly=True)
-    _, data = imap_conn.search(None, 'UNSEEN')
-    unreads = data[0].split()
-    lenunre = len(unreads)
-    if lenunre>0:
-        print '\n',config['user'],
-        print '%d unread message(s).' % lenunre
-    ids = ','.join(unreads[:MAX_FETCH])
-    if ids:
-        _, data = imap_conn.fetch(ids, '(RFC822.HEADER)')
-        for item in data:
-            if isinstance(item, tuple):
-                raw_msg = item[1]
-                msg = email.message_from_string(raw_msg)
-                print '\033[1;35m%s\033[0m: \033[1;32m%s\033[0m' % (
-                email.header.decode_header(msg['from'])[0][0],
-                email.header.decode_header(msg['subject'])[0][0],
-                )
-    imap_conn.close()
-    imap_conn.logout()
-    return lenunre
+    return check.check(auth_string)
 
 if __name__ == '__main__':
     main()
