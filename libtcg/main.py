@@ -60,14 +60,8 @@ def main():
         cf1 = oc1['common']
         client = cf1['client_id'],cf1['client_secret']
         tmp1=oc1['items']
-        check_items(tmp1,client)
-
-def check_items(tmp1,client):
-    for it1 in tmp1:
-        num = check_name(it1,client)
-        if not num > 0 :
-            print '.',
-            sys.stdout.flush()
+        for it1 in tmp1:
+            check_name(it1,client)
 
 def check_name(config,client):
     client_id,client_secret = client
@@ -78,7 +72,14 @@ def check_name(config,client):
     access_token = response['access_token']
     auth_string = oauth2.GenerateOAuth2String(user, access_token,
                              base64_encode=False)
-    return check.check(auth_string)
+    ret1, print_mail = check.check(auth_string)
+    if ret1 > 0:
+        print '\n',config['user'],
+        print print_mail
+    else:
+        print '.',
+        sys.stdout.flush()
+    return ret1
 
 if __name__ == '__main__':
     main()
