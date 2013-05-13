@@ -38,9 +38,8 @@ def main():
         response = oauth2.AuthorizeTokens(tmpc['client_id'], tmpc['client_secret'],
                                 authorization_code)
         config1['refresh_token']= response['refresh_token']
-        file1 = open(options.output, 'w')
-        k=json.dump(config1,file1,indent=4)
-        file1.close()
+        with open(options.output, 'w') as file1:
+            k=json.dump(config1,file1,indent=4)
         print '\nconfig written.\n'
     elif options.merge:
         config_a ={} 
@@ -52,9 +51,8 @@ def main():
             config1.append(tmp1)
 
         config_a['items'] = config1
-        file1 = open('config_merge', 'w')
-        k=json.dump(config_a,file1,indent=4)
-        file1.close()
+        with open('config_merge', 'w') as file1:
+            k=json.dump(config_a,file1,indent=4)
     elif options.check:
         oc1 = open_conf(filename)
         cf1 = oc1['common']

@@ -7,7 +7,6 @@ def open_conf(filename):
         ret= subprocess.Popen(args='gpg --output - %s' % filename, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE).communicate()[0]
         tmp1=json.loads(ret)
     else:
-        file1 = open(filename,'r')
-        tmp1 = json.load(file1)
-        file1.close()
+        with open(filename,'r') as file1:
+            tmp1 = json.load(file1)
     return tmp1
