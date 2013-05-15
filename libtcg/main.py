@@ -58,8 +58,17 @@ def main():
         cf1 = oc1['common']
         client = cf1['client_id'],cf1['client_secret']
         tmp1=oc1['items']
+        ret3 = []
         for it1 in tmp1:
-            check_name(it1,client)
+            ret2 = check_name(it1,client)
+            if ret2 == '.':
+                print (ret2),
+            else :
+                print ('%'),
+                ret3.append(ret2)
+            sys.stdout.flush()
+        for it1 in ret3:
+            print(it1)
 
 def check_name(config,client):
     client_id,client_secret = client
@@ -72,12 +81,10 @@ def check_name(config,client):
                              base64_encode=False)
     ret1, print_mail = check.check(auth_string)
     if ret1 > 0:
-        print '\n',config['user'],
-        print print_mail
+        ret2 =  '\n' + config['user']+'\n'+print_mail
     else:
-        print '.',
-        sys.stdout.flush()
-    return ret1
+        ret2 = '.'
+    return ret2
 
 if __name__ == '__main__':
     main()
