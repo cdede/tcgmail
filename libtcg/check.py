@@ -27,6 +27,6 @@ def check(auth_string):
                 str1 += str2 + '\n'
     imap_conn.close()
     imap_conn.logout()
-    return lenunre, str1
+    return lenunre, str1.decode("utf-8", "replace")
 
 
