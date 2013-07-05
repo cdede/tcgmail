@@ -60,13 +60,18 @@ def main():
         tmp1=oc1['items']
         ret3 = []
         for it1 in tmp1:
-            ret2 = check_name(it1,client)
+            try:
+                ret2 = check_name(it1,client)
+            except ValueError:
+                ret2 = 'err :'+ (it1['user']) +'\n'
+
             if ret2 == '.':
                 print (ret2),
             else :
                 print ('%'),
                 ret3.append(ret2)
             sys.stdout.flush()
+        print("\n")
         for it1 in ret3:
             print(it1)
 
